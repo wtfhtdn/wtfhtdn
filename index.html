@@ -761,7 +761,7 @@ function renderEntityGrid() {
     const isActive = count > 0;
     const isSelected = activeFilters.has(t.id);
     const cls = isSelected ? 'selected' : isActive ? 'has-content' : 'no-content';
-    const dots = isActive ? '🔥'.repeat(Math.min(sev, 3)) : '';
+    const dots = isActive ? '💩'.repeat(Math.min(sev, 3)) : '';
     const onclick = isActive ? `onclick="tileFilter('${t.id}')"` : '';
 
     return `<div class="entity-tile ${cls}" ${onclick} style="${isSelected ? `background:${t.color}` : ''}">
@@ -856,7 +856,7 @@ function showStatus(type, msg) {
   if(type!=='loading') setTimeout(()=>{el.className='status-bar hidden';},5000);
 }
 
-function sevDots(n){return '🔥'.repeat(Math.max(1,Math.min(5,n||1)));}
+function sevDots(n){return '💩'.repeat(Math.max(1,Math.min(5,n||1)));}
 
 function fmtDate(str) {
   if(!str) return 'recently';
