@@ -500,16 +500,19 @@ const WORKER_URL = 'https://wtfhtdn-worker.wtfhtdn.workers.dev';
 const POLL_INTERVAL_MS = 1 * 60 * 1000; // poll worker every minute (Worker dedupes, so cost stays flat)
 
 const THEY = [
-  {id:'musk',      label:'Musk',           color:'#7c3aed'},
-  {id:'trump',     label:'Trump',          color:'#dc2626'},
-  {id:'bezos',     label:'Bezos',          color:'#0369a1'},
-  {id:'zuck',      label:'Zuckerberg',     color:'#0891b2'},
-  {id:'banks',     label:'The Banks',      color:'#059669'},
-  {id:'tories',    label:'UK Tories',      color:'#1d4ed8'},
-  {id:'silicon',   label:'Silicon Valley', color:'#b45309'},
-  {id:'murdoch',   label:'Murdoch/Media',  color:'#9f1239'},
-  {id:'petro',     label:'Petrostates',    color:'#92400e'},
-  {id:'farright',  label:'Far Right',      color:'#7f1d1d'},
+  {id:'musk',      label:'Musk',              color:'#7c3aed'},
+  {id:'trump',     label:'Trump',             color:'#dc2626'},
+  {id:'bezos',     label:'Bezos',             color:'#0369a1'},
+  {id:'zuck',      label:'Zuckerberg',        color:'#0891b2'},
+  {id:'banks',     label:'The Banks',         color:'#059669'},
+  {id:'tories',    label:'UK Tories',         color:'#1d4ed8'},
+  {id:'silicon',   label:'Silicon Valley',    color:'#b45309'},
+  {id:'murdoch',   label:'Murdoch / Media',   color:'#9f1239'},
+  {id:'petro',     label:'Petrostates',       color:'#92400e'},
+  {id:'farright',  label:'Far Right',         color:'#7f1d1d'},
+  {id:'labour',    label:'UK Labour',         color:'#1e3a5f'},
+  {id:'landlords', label:'Landlords',         color:'#0e7490'},
+  {id:'pharma',    label:'Big Pharma',        color:'#4a1942'},
 ];
 
 let allItems = [], activeFilters = new Set(), meta = {};
