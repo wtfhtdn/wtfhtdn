@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What The Fuck Have They Done Now</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:#e8001c; --dark-red:#a00013; --bg:#0d0d0d; --surface:#161616;
+    --surface2:#1e1e1e; --border:#2a2a2a; --text:#f0ede8; --muted:#777;
+    --yellow:#f5c400; --green:#00c853; --blue:#4dabf7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+  /* MASTHEAD */
+  .masthead{background:var(--red);position:relative;overflow:hidden}
+  .masthead::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 4px,rgba(0,0,0,.07) 4px,rgba(0,0,0,.07) 8px);pointer-events:none}
+  .masthead-inner{max-width:1200px;margin:0 auto;padding:0 24px 16px;position:relative}
+  .masthead-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+
+  /* Three-line title — all lines share the same base font-size; transforms do the scaling */
+  .site-title{
+    font-family:'Bebas Neue',sans-serif;
+    letter-spacing:.04em;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    line-height:1;
+  }
+
+  /* Base font size shared by all three lines */
+  .title-top, .title-fuck, .title-bottom {
+    font-size:clamp(1rem,3vw,2.2rem);
+    line-height:1;
+    display:block;
+    transform-origin:top left;
+  }
+
+  /* WHAT THE: scaleX(2) scaleY(2) — doubled in both dimensions */
+  .title-top-wrap{
+    display:block;
+    /* extra height = 1× natural height (scaleY doubles it, so 1 extra unit) */
+    margin-bottom:clamp(1rem,3vw,2.2rem);
+    padding-top:18px;
+  }
+  .title-top{
+    color:#fff;
+    transform:scaleX(2) scaleY(2);
+  }
+
+  /* FUCK: scale(4) — four times in all directions */
+  .title-fuck-wrap{
+    display:block;
+    /* extra height = 3× natural height (scale(4) → 4 units tall, natural is 1, extra is 3) */
+    margin-bottom:calc(clamp(1rem,3vw,2.2rem) * 3);
+  }
+  .title-fuck{
+    color:#000;
+    transform:scale(4);
+  }
+
+  /* HAVE THEY DONE NOW: no transform, normal size */
+  .title-bottom{
+    color:#fff;
+    padding-bottom:18px;
+  }
+
+  .masthead-meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:18px}
+  .live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.85);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.64rem;font-weight:600;letter-spacing:.1em;padding:5px 11px;border-radius:2px}
+  .live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.4s ease-in-out infinite}
+  .live-dot.dead{background:var(--muted);animation:none}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .last-updated{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.6);letter-spacing:.06em;text-align:right}
+  .tagline{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:rgba(255,255,255,.6);margin-top:6px;letter-spacing:.1em;text-transform:uppercase}
+
+  /* TICKER */
+  .ticker{background:rgba(232,0,28,.1);border-bottom:1px solid rgba(232,0,28,.2);overflow:hidden;height:28px;display:flex;align-items:center}
+  .ticker-label{background:var(--red);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.76rem;letter-spacing:.06em;padding:0 12px;height:100%;display:flex;align-items:center;flex-shrink:0}
+  .ticker-track{overflow:hidden;flex:1;height:100%;display:flex;align-items:center}
+  .ticker-inner{display:flex;white-space:nowrap;animation:ticker 80s linear infinite;will-change:transform}
+  .ticker-inner.paused{animation-play-state:paused}
+  .ticker-item{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:#ccc;padding:0 28px 0 0;cursor:pointer}
+  .ticker-item:hover{color:#fff}
+  .ticker-sep{color:var(--red);margin-right:28px}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* CONTROLS */
+  .controls{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+  .controls-inner{max-width:1200px;margin:0 auto;padding:11px 24px;display:flex;flex-direction:column;gap:9px}
+  .refresh-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.06em}
+  .refresh-btn:hover{border-color:var(--red);color:var(--red)}
+  .refresh-btn:disabled{opacity:.4;cursor:not-allowed}
+  .random-btn{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.06em;flex-shrink:0}
+  .random-btn:hover{border-color:var(--yellow);color:var(--yellow)}
+  /* FILTER TAG INPUT — autocomplete + selected pills */
+  .filter-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+  .filter-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;padding-top:6px}
+
+  .tag-input-wrap{
+    flex:1;
+    min-width:180px;
+    position:relative;
+  }
+  .tag-input-field{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    align-items:center;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:3px;
+    padding:5px 8px;
+    cursor:text;
+    min-height:34px;
+    transition:border-color .15s;
+  }
+  .tag-input-field:focus-within{border-color:var(--red)}
+
+  /* selected pills */
+  .filter-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:2px 7px 2px 8px;
+    border-radius:2px;
+    font-size:.73rem;
+    font-weight:500;
+    color:#fff;
+    white-space:nowrap;
+    animation:pillIn .12s ease;
+  }
+  @keyframes pillIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+  .filter-pill-x{
+    background:none;
+    border:none;
+    color:rgba(255,255,255,.7);
+    cursor:pointer;
+    font-size:.8rem;
+    line-height:1;
+    padding:0;
+    display:flex;
+    align-items:center;
+  }
+  .filter-pill-x:hover{color:#fff}
+
+  /* text input inside the field */
+  .tag-text-input{
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:.84rem;
+    min-width:80px;
+    flex:1;
+    padding:1px 0;
+  }
+  .tag-text-input::placeholder{color:var(--muted)}
+
+  /* dropdown suggestions */
+  .tag-suggestions{
+    position:absolute;
+    top:calc(100% + 4px);
+    left:0;
+    right:0;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:3px;
+    z-index:200;
+    overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    display:none;
+  }
+  .tag-suggestions.open{display:block}
+  .tag-suggestion{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 10px;
+    cursor:pointer;
+    font-size:.82rem;
+    transition:background .1s;
+  }
+  .tag-suggestion:hover,.tag-suggestion.active{background:var(--surface2)}
+  .sug-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sug-count{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);margin-left:auto}
+  .sort-select{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:3px 9px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.74rem;outline:none;cursor:pointer}
+
+  /* LAYOUT */
+  .layout{max-width:1200px;margin:0 auto;padding:18px 24px;display:grid;grid-template-columns:1fr 285px;gap:18px;align-items:start}
+  .feed{display:flex;flex-direction:column}
+
+  /* ENTITY GRID */
+  .entity-grid{
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    padding:12px 24px;
+  }
+  .entity-grid-inner{
+    max-width:1200px;
+    margin:0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+  }
+  .entity-tile{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 10px 5px 8px;
+    border-radius:3px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:all .15s;
+    user-select:none;
+    position:relative;
+  }
+  /* active — has content, not selected */
+  .entity-tile.has-content{
+    background:var(--surface2);
+    border-color:var(--border);
+  }
+  .entity-tile.has-content:hover{
+    border-color:var(--muted);
+  }
+  /* selected */
+  .entity-tile.selected{
+    border-color:transparent;
+    box-shadow:0 0 0 2px #fff;
+  }
+  /* inactive — no content in window */
+  .entity-tile.no-content{
+    background:transparent;
+    border-color:var(--border);
+    opacity:.28;
+    cursor:default;
+  }
+  .entity-tile-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .entity-tile-label{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:.82rem;
+    letter-spacing:.05em;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .entity-tile.no-content .entity-tile-label{color:var(--muted)}
+  .entity-tile-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.6rem;
+    color:var(--muted);
+    margin-left:1px;
+  }
+  .entity-tile.selected .entity-tile-count{color:rgba(255,255,255,.7)}
+  .entity-tile.selected .entity-tile-label{color:#fff}
+  /* severity pip row */
+  .entity-tile-sev{
+    font-size:.55rem;
+    letter-spacing:-1px;
+    opacity:.8;
+  }
+  .status-bar{display:flex;align-items:center;gap:9px;padding:9px 13px;font-family:'JetBrains Mono',monospace;font-size:.67rem;border-radius:2px;margin-bottom:11px;letter-spacing:.04em}
+  .status-bar.loading{background:rgba(245,196,0,.08);border:1px solid rgba(245,196,0,.3);color:var(--yellow)}
+  .status-bar.error{background:rgba(232,0,28,.08);border:1px solid rgba(232,0,28,.3);color:#ff6b6b}
+  .status-bar.success{background:rgba(0,200,83,.08);border:1px solid rgba(0,200,83,.3);color:var(--green)}
+  .status-bar.hidden{display:none}
+  .spinner{width:9px;height:9px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* CARDS */
+  .card{background:var(--surface);border:1px solid var(--border);border-left:3px solid transparent;padding:15px 17px;margin-bottom:2px;cursor:pointer;transition:border-left-color .12s,background .12s;animation:slideIn .25s ease both}
+  .card:hover{background:var(--surface2);border-left-color:var(--red)}
+  @keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+  .card-meta{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+  .who-pill{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.04em;padding:2px 8px;border-radius:2px;color:#fff;white-space:nowrap}
+  .card-source{font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .card-time{font-family:'JetBrains Mono',monospace;font-size:.59rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+  .card-headline{font-size:.95rem;font-weight:500;line-height:1.4;margin-bottom:5px;color:var(--text)}
+  .card-summary{font-size:.81rem;line-height:1.55;color:#999;font-weight:300;margin-bottom:8px}
+  /* EMPTY */
+  .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty-state .big{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:var(--border);display:block;margin-bottom:10px}
+  .empty-state p{font-size:.84rem;line-height:1.6}
+
+  /* SIDEBAR */
+  .sidebar{display:flex;flex-direction:column;gap:14px}
+  .sidebar-block{background:var(--surface);border:1px solid var(--border);padding:15px}
+  .sidebar-title{font-family:'Bebas Neue',sans-serif;font-size:.98rem;letter-spacing:.06em;color:var(--red);border-bottom:1px solid var(--border);padding-bottom:7px;margin-bottom:11px}
+  .lb-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .lb-row:last-child{border:none}
+  .lb-rank{font-family:'Bebas Neue',sans-serif;font-size:.93rem;color:var(--muted);width:16px;text-align:center}
+  .lb-inner{flex:1}
+  .lb-top{display:flex;justify-content:space-between;align-items:baseline}
+  .lb-name{font-weight:500;font-size:.78rem}
+  .lb-count{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--red)}
+  .lb-bar{height:2px;background:var(--border);border-radius:1px;margin-top:3px;overflow:hidden}
+  .lb-fill{height:100%;border-radius:1px;transition:width .6s ease}
+  .source-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.77rem}
+  .source-row:last-child{border:none}
+  .ok{color:var(--green)} .err{color:var(--red)}
+  .about-text{font-size:.77rem;color:#999;line-height:1.65}
+
+  /* SUGGESTION BOX */
+  .suggest-input{
+    width:100%;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:3px;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:.78rem;
+    padding:8px 10px;
+    resize:none;
+    outline:none;
+    margin-top:10px;
+    transition:border-color .15s;
+    line-height:1.5;
+  }
+  .suggest-input:focus{border-color:var(--red)}
+  .suggest-input::placeholder{color:var(--muted)}
+  .suggest-btn{
+    margin-top:7px;
+    width:100%;
+    background:none;
+    border:1px solid var(--border);
+    border-radius:3px;
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    padding:7px;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .suggest-btn:hover{border-color:var(--text);color:var(--text)}
+  .suggest-btn:disabled{opacity:.4;cursor:not-allowed}
+  .suggest-thanks{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    color:var(--green);
+    text-align:center;
+    padding:8px 0 2px;
+    display:none;
+  }
+
+  /* DONATE */
+  .donate-block{margin-top:2px}
+  .donate-label{font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:8px;display:block}
+  .donate-options{display:flex;flex-direction:column;gap:6px}
+  .donate-btn{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:3px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.68rem;
+    letter-spacing:.05em;padding:8px 10px;text-decoration:none;
+    transition:all .15s;cursor:pointer;
+  }
+  .donate-btn:hover{border-color:var(--text);background:var(--surface)}
+  .donate-btn-icon{font-size:.9rem;flex-shrink:0}
+  .donate-btn-text{flex:1}
+  .donate-btn-sub{display:block;font-size:.58rem;color:var(--muted);margin-top:1px;letter-spacing:.03em;font-family:'DM Sans',sans-serif}
+  .donate-xmr{border-color:rgba(255,102,0,.3)}
+  .donate-xmr:hover{border-color:#ff6600;color:#ff9944}
+  .donate-libera:hover{border-color:var(--yellow);color:var(--yellow)}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--red);max-width:660px;width:100%;max-height:84vh;overflow-y:auto;padding:26px;position:relative;animation:modalIn .18s ease;border-radius:1px}
+  @keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  .modal-close{position:absolute;top:13px;right:13px;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;line-height:1}
+  .modal-close:hover{color:var(--red)}
+  .modal-who{font-family:'Bebas Neue',sans-serif;font-size:.83rem;letter-spacing:.05em;padding:3px 10px;border-radius:2px;color:#fff;display:inline-block;margin-bottom:11px}
+  .modal-headline{font-size:1.18rem;font-weight:500;line-height:1.4;margin-bottom:13px}
+  .modal-byline{font-family:'JetBrains Mono',monospace;font-size:.61rem;color:var(--muted);margin-bottom:13px;letter-spacing:.04em}
+  .modal-summary{font-size:.87rem;line-height:1.7;color:#bbb;font-weight:300;margin-bottom:18px}
+  .modal-original{background:var(--surface2);border:1px solid var(--border);padding:11px 13px;margin-bottom:15px;font-size:.77rem;color:#888;line-height:1.55}
+  .modal-original strong{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px}
+  .modal-link{color:var(--red);font-size:.76rem;font-family:'JetBrains Mono',monospace;text-decoration:none}
+  .modal-link:hover{text-decoration:underline}
+
+  @media(max-width:840px){.layout{grid-template-columns:1fr}.sidebar{display:none}.masthead-meta{display:none}}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-top">
+      <h1 class="site-title">
+        <span class="title-top-wrap"><span class="title-top">WHAT THE</span></span>
+        <span class="title-fuck-wrap"><span class="title-fuck">FUCK</span></span>
+        <span class="title-bottom">HAVE THEY DONE NOW</span>
+      </h1>
+      <div class="masthead-meta">
+        <div class="live-badge"><div class="live-dot" id="liveDot"></div> LIVE FEED</div>
+        <div class="last-updated" id="lastUpdated">Loading…</div>
+      </div>
+    </div>
+    <p class="tagline">bbc · guardian · al jazeera · sky · nyt · auto-updated every minute</p>
+  </div>
+</div>
+
+<div class="ticker" id="ticker">
+  <div class="ticker-label">BREAKING</div>
+  <div class="ticker-track"><div class="ticker-inner" id="tickerInner"><span style="font-family:'JetBrains Mono',monospace;font-size:.63rem;color:#555;padding:0 20px">Awaiting the latest stupidity…</span></div></div>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="filter-row">
+      <span class="filter-label">Filter →</span>
+      <div class="tag-input-wrap" id="tagInputWrap">
+        <div class="tag-input-field" id="tagInputField" onclick="document.getElementById('tagTextInput').focus()">
+          <input class="tag-text-input" id="tagTextInput" type="text" placeholder="Type a name…" autocomplete="off" />
+        </div>
+        <div class="tag-suggestions" id="tagSuggestions"></div>
+      </div>
+      <button class="random-btn" onclick="pickRandom()" title="Pick a random suspect">⚄ RANDOM</button>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadFeed()">↻ CHECK NOW</button>
+      <select class="sort-select" id="sortSelect" onchange="renderFeed()">
+        <option value="newest">Newest first</option>
+        <option value="worst">Worst offences</option>
+        <option value="name">By perpetrator</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ENTITY GRID — live status board -->
+<div class="entity-grid" id="entityGrid">
+  <div class="entity-grid-inner" id="entityGridInner">
+    <!-- populated by renderEntityGrid() -->
+  </div>
+</div>
+
+<div class="layout">
+  <div>
+    <div id="statusBar" class="status-bar hidden"></div>
+    <div class="feed" id="feedEl">
+      <div class="empty-state"><span class="big">📡</span><p>Tuning in…</p></div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="sidebar-block">
+      <div class="sidebar-title">📡 Monitoring</div>
+      <div id="sourceStatus"><p style="color:var(--muted);font-size:.77rem">Loading…</p></div>
+    </div>
+
+    <!-- SUGGESTION BOX -->
+    <div class="sidebar-block">
+      <div class="sidebar-title">🎯 Missing Someone?</div>
+      <p class="about-text">Someone or something getting away with it? Suggest a new entry for the feed.</p>
+      <textarea class="suggest-input" id="suggestInput" rows="3"
+        placeholder="e.g. Serco, Capita, The CBI, Isabel Oakeshott…"></textarea>
+      <button class="suggest-btn" id="suggestBtn" onclick="submitSuggestion()">→ SUBMIT SUGGESTION</button>
+      <div class="suggest-thanks" id="suggestThanks">✓ Noted. They're being watched.</div>
+    </div>
+
+    <!-- DONATE -->
+    <div class="sidebar-block">
+      <div class="sidebar-title">☕ Keep It Running</div>
+      <span class="donate-label">This site costs ~£3/month to run. If it's useful, consider chipping in.</span>
+      <div class="donate-options">
+        <a class="donate-btn donate-libera" href="https://liberapay.com/wtfhtdn/donate" target="_blank" rel="noopener">
+          <span class="donate-btn-icon">◈</span>
+          <span class="donate-btn-text">Donate via Liberapay
+            <span class="donate-btn-sub">Open source · secure · anonymous</span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="sidebar-block">
+      <div class="sidebar-title">ℹ About</div>
+      <p class="about-text">Live RSS from BBC, Guardian, Al Jazeera, Sky &amp; NYT — monitored every minute, digested by AI into an accountability feed.</p>
+      <p class="about-text" style="margin-top:8px">Click any card to expand. Filter by perpetrator, or hit Random.</p>
+      <p class="about-text" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">wtfhtdn v0.4</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal"><button class="modal-close" onclick="closeModal()">✕</button><div id="modalBody"></div></div>
+</div>
+
+<script>
+'use strict';
+
+// !! REPLACE THIS with your actual Cloudflare Worker URL after deployment !!
+const WORKER_URL = 'https://wtfhtdn-worker.wtfhtdn.workers.dev';
+
+const POLL_INTERVAL_MS = 1 * 60 * 1000; // poll worker every minute (Worker dedupes, so cost stays flat)
+
+const THEY = [
+  {id:'musk',      label:'Musk',           color:'#7c3aed'},
+  {id:'trump',     label:'Trump',          color:'#dc2626'},
+  {id:'bezos',     label:'Bezos',          color:'#0369a1'},
+  {id:'zuck',      label:'Zuckerberg',     color:'#0891b2'},
+  {id:'banks',     label:'The Banks',      color:'#059669'},
+  {id:'tories',    label:'UK Tories',      color:'#1d4ed8'},
+  {id:'silicon',   label:'Silicon Valley', color:'#b45309'},
+  {id:'murdoch',   label:'Murdoch/Media',  color:'#9f1239'},
+  {id:'petro',     label:'Petrostates',    color:'#92400e'},
+  {id:'farright',  label:'Far Right',      color:'#7f1d1d'},
+];
+
+let allItems = [], activeFilters = new Set(), meta = {};
+
+function init() {
+  document.addEventListener('keydown', e => { if(e.key==='Escape') { closeModal(); closeSuggestions(); } });
+  document.getElementById('ticker').addEventListener('mouseenter', () =>
+    document.getElementById('tickerInner').classList.add('paused'));
+  document.getElementById('ticker').addEventListener('mouseleave', () =>
+    document.getElementById('tickerInner').classList.remove('paused'));
+
+  // Tag autocomplete
+  const input = document.getElementById('tagTextInput');
+  input.addEventListener('input', onTagInput);
+  input.addEventListener('keydown', onTagKeydown);
+  input.addEventListener('focus', () => { if(input.value) onTagInput(); });
+  document.addEventListener('click', e => {
+    if (!document.getElementById('tagInputWrap').contains(e.target)) closeSuggestions();
+  });
+
+  loadFeed();
+  setInterval(loadFeed, POLL_INTERVAL_MS);
+}
+
+// ── TAG AUTOCOMPLETE ──────────────────────────────────────────────────────────
+
+let suggestionIndex = -1;
+
+function onTagInput() {
+  const q = document.getElementById('tagTextInput').value.toLowerCase().trim();
+  const counts = {};
+  allItems.forEach(i => { counts[i.who] = (counts[i.who]||0)+1; });
+
+  const matches = THEY.filter(t =>
+    !activeFilters.has(t.id) &&
+    (q === '' || t.label.toLowerCase().includes(q) || t.id.includes(q))
+  );
+
+  if (!matches.length) { closeSuggestions(); return; }
+
+  const sug = document.getElementById('tagSuggestions');
+  suggestionIndex = -1;
+  sug.innerHTML = matches.map((t, i) => `
+    <div class="tag-suggestion" data-id="${t.id}" onmousedown="selectTag('${t.id}')">
+      <span class="sug-dot" style="background:${t.color}"></span>
+      <span>${esc(t.label)}</span>
+      ${counts[t.id] ? `<span class="sug-count">${counts[t.id]}</span>` : ''}
+    </div>`).join('');
+  sug.classList.add('open');
+}
+
+function onTagKeydown(e) {
+  const sug = document.getElementById('tagSuggestions');
+  const items = sug.querySelectorAll('.tag-suggestion');
+  if (!sug.classList.contains('open')) {
+    if (e.key === 'ArrowDown') { onTagInput(); return; }
+    return;
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    suggestionIndex = Math.min(suggestionIndex + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('active', i === suggestionIndex));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    suggestionIndex = Math.max(suggestionIndex - 1, -1);
+    items.forEach((el, i) => el.classList.toggle('active', i === suggestionIndex));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (suggestionIndex >= 0 && items[suggestionIndex]) {
+      selectTag(items[suggestionIndex].dataset.id);
+    } else if (items.length === 1) {
+      selectTag(items[0].dataset.id);
+    }
+  } else if (e.key === 'Backspace' && document.getElementById('tagTextInput').value === '') {
+    // remove last pill on backspace with empty input
+    const last = [...activeFilters].pop();
+    if (last) removeFilter(last);
+  } else if (e.key === 'Escape') {
+    closeSuggestions();
+  }
+}
+
+function selectTag(id) {
+  activeFilters.add(id);
+  document.getElementById('tagTextInput').value = '';
+  closeSuggestions();
+  renderPills();
+  renderEntityGrid();
+  renderFeed();
+  document.getElementById('tagTextInput').focus();
+}
+
+function removeFilter(id) {
+  activeFilters.delete(id);
+  renderPills();
+  renderEntityGrid();
+  renderFeed();
+}
+
+function renderPills() {
+  const field = document.getElementById('tagInputField');
+  const input = document.getElementById('tagTextInput');
+  // Remove existing pills (keep the input element)
+  field.querySelectorAll('.filter-pill').forEach(el => el.remove());
+  // Insert fresh pills before the input
+  [...activeFilters].forEach(id => {
+    const t = THEY.find(x => x.id === id);
+    if (!t) return;
+    const pill = document.createElement('span');
+    pill.className = 'filter-pill';
+    pill.style.background = t.color;
+    pill.dataset.id = id;
+    pill.innerHTML = `${esc(t.label)}<button class="filter-pill-x" onmousedown="event.preventDefault();removeFilter('${id}')">×</button>`;
+    field.insertBefore(pill, input);
+  });
+}
+
+function closeSuggestions() {
+  document.getElementById('tagSuggestions').classList.remove('open');
+  suggestionIndex = -1;
+}
+
+function toggleFilter(id) { // kept for card pill clicks
+  if (activeFilters.has(id)) removeFilter(id);
+  else selectTag(id);
+}
+
+function pickRandom() {
+  // Pick from THEY entries that actually have items in the current feed
+  const represented = THEY.filter(t => allItems.some(i => i.who === t.id));
+  const pool = represented.length ? represented : THEY;
+  const available = pool.filter(t => !activeFilters.has(t.id));
+  if (!available.length) { activeFilters.clear(); renderPills(); renderFeed(); return; }
+  const pick = available[Math.floor(Math.random() * available.length)];
+  selectTag(pick.id);
+}
+
+async function loadFeed() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  showStatus('loading', 'Fetching latest digest…');
+
+  try {
+    const resp = await fetch(`${WORKER_URL}/feed`);
+    if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
+    const data = await resp.json();
+
+    if (data.error) throw new Error(data.error);
+
+    allItems = data.items || [];
+    meta = data._meta || {};
+
+    renderFeed();
+    renderEntityGrid();
+    renderSources();
+    updateTicker();
+    renderPills(); // refresh pill colours / suggestion counts
+
+    const lu = meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleString('en-GB', {
+      day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'
+    }) : 'unknown';
+    document.getElementById('lastUpdated').textContent = `Updated ${lu}`;
+    document.getElementById('liveDot').className = 'live-dot';
+    showStatus('success', `${allItems.length} items · last digest ${lu}`);
+  } catch(err) {
+    console.error(err);
+    document.getElementById('liveDot').className = 'live-dot dead';
+    showStatus('error', `Could not reach feed: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderFeed() {
+  const feed = document.getElementById('feedEl');
+  const items = getFiltered();
+  if (!items.length && !allItems.length) {
+    feed.innerHTML = `<div class="empty-state"><span class="big">📡</span><p>Loading…</p></div>`;
+    return;
+  }
+  if (!items.length) {
+    feed.innerHTML = `<div class="empty-state"><span class="big">🔍</span><p>No results. Clear your filters.</p></div>`;
+    return;
+  }
+  feed.innerHTML = items.map((item, i) => cardHTML(item, i)).join('');
+}
+
+const MAX_PER_PERSON = 5;
+
+function getFiltered() {
+  // Sort first so we always keep the most recent/worst per person
+  const sort = document.getElementById('sortSelect').value;
+  let out = [...allItems];
+  if (sort === 'worst') out.sort((a,b) => b.severity - a.severity);
+  else if (sort === 'name') out.sort((a,b) => (a.whoLabel||'').localeCompare(b.whoLabel||''));
+  else out.sort((a,b) => new Date(b.pubDate||0) - new Date(a.pubDate||0));
+
+  // Apply per-person cap (before filter, so cap applies globally not just to active filters)
+  const perPersonCount = {};
+  out = out.filter(i => {
+    perPersonCount[i.who] = (perPersonCount[i.who]||0) + 1;
+    return perPersonCount[i.who] <= MAX_PER_PERSON;
+  });
+
+  // Apply active filters
+  if (activeFilters.size) out = out.filter(i => activeFilters.has(i.who));
+
+  return out;
+}
+
+function cardHTML(item, i) {
+  const they = THEY.find(t=>t.id===item.who);
+  const color = they?.color||'#444';
+  return `<div class="card" onclick="openModal(${i})" style="animation-delay:${Math.min(i,20)*.03}s">
+    <div class="card-meta">
+      <span class="who-pill" style="background:${color}">${esc(item.whoLabel||item.who)}</span>
+      <span class="card-source">${esc(item.source||'')}</span>
+      <span class="card-time">${esc(fmtDate(item.pubDate))} ${sevDots(item.severity)}</span>
+    </div>
+    <div class="card-headline">${esc(item.headline)}</div>
+    <div class="card-summary">${esc(item.summary)}</div>
+  </div>`;
+}
+
+function renderEntityGrid() {
+  const counts = {};
+  const maxSev = {};
+  allItems.forEach(i => {
+    counts[i.who] = (counts[i.who]||0) + 1;
+    maxSev[i.who] = Math.max(maxSev[i.who]||0, i.severity||1);
+  });
+
+  const grid = document.getElementById('entityGridInner');
+  if (!grid) return;
+
+  // Sort: active ones first (by count desc), then inactive
+  const sorted = [...THEY].sort((a,b) => {
+    const ca = counts[a.id]||0, cb = counts[b.id]||0;
+    return cb - ca;
+  });
+
+  grid.innerHTML = sorted.map(t => {
+    const count = counts[t.id]||0;
+    const sev = maxSev[t.id]||0;
+    const isActive = count > 0;
+    const isSelected = activeFilters.has(t.id);
+    const cls = isSelected ? 'selected' : isActive ? 'has-content' : 'no-content';
+    const dots = isActive ? '🔥'.repeat(Math.min(sev, 3)) : '';
+    const onclick = isActive ? `onclick="tileFilter('${t.id}')"` : '';
+
+    return `<div class="entity-tile ${cls}" ${onclick} style="${isSelected ? `background:${t.color}` : ''}">
+      <span class="entity-tile-dot" style="background:${t.color};opacity:${isActive?1:.4}"></span>
+      <span class="entity-tile-label">${esc(t.label)}</span>
+      ${isActive ? `<span class="entity-tile-count">${count}</span>` : ''}
+      ${dots ? `<span class="entity-tile-sev">${dots}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function tileFilter(id) {
+  if (activeFilters.has(id)) {
+    activeFilters.delete(id);
+  } else {
+    activeFilters.add(id);
+  }
+  renderPills();
+  renderEntityGrid();
+  renderFeed();
+}
+
+function renderSources() {
+  if (!meta.sourcesOk && !meta.sourcesFailed) return;
+  const ok = meta.sourcesOk || [], fail = meta.sourcesFailed || [];
+  document.getElementById('sourceStatus').innerHTML =
+    [...ok.map(s=>`<div class="source-row"><span>${esc(s)}</span><span class="ok">✓</span></div>`),
+     ...fail.map(s=>`<div class="source-row"><span>${esc(s)}</span><span class="err">✗</span></div>`)
+    ].join('');
+}
+
+function updateTicker() {
+  if (!allItems.length) return;
+  const items = allItems.slice(0,20);
+  document.getElementById('tickerInner').innerHTML =
+    [...items,...items].map((item,i) =>
+      `<span class="ticker-item" onclick="openModal(${i%items.length})">${esc(item.whoLabel)}: ${esc(item.headline)}<span class="ticker-sep"> ◆ </span></span>`
+    ).join('');
+}
+
+function openModal(idx) {
+  const items = getFiltered();
+  const item = items[idx];
+  if (!item) return;
+  const they = THEY.find(t=>t.id===item.who);
+  document.getElementById('modalBody').innerHTML = `
+    <span class="modal-who" style="background:${they?.color||'#444'}">${esc(item.whoLabel||item.who)}</span>
+    <div class="modal-headline">${esc(item.headline)}</div>
+    <div class="modal-byline">${esc(item.source||'')} · ${esc(fmtDate(item.pubDate))} · Severity: ${sevDots(item.severity)}</div>
+    <div class="modal-summary">${esc(item.summary)}</div>
+    <div class="modal-original"><strong>Original headline</strong>${esc(item.originalTitle||'—')}</div>
+    ${item.url&&item.url!=='none'&&item.url!=='null'
+      ?`<a class="modal-link" href="${esc(item.url)}" target="_blank" rel="noopener">→ Read full story at ${esc(item.source)}</a>`
+      :`<span style="font-size:.71rem;color:var(--muted);font-family:'JetBrains Mono',monospace">No source link available</span>`}`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if(!e||e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open');
+}
+
+// ── SUGGESTION BOX ───────────────────────────────────────────────────────────
+
+// Suggestions are stored anonymously in the browser's localStorage so they
+// persist across visits without any server. To actually collect them, replace
+// this function with a fetch() to a Cloudflare Worker endpoint, a Tally form
+// submit, or a pre-filled GitHub Issue URL opener — see comments below.
+
+function submitSuggestion() {
+  const input = document.getElementById('suggestInput');
+  const btn   = document.getElementById('suggestBtn');
+  const thanks = document.getElementById('suggestThanks');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Opens a pre-filled mailto to the site's suggestions address.
+  // Submitter's email client handles sending — no server needed.
+  const subject = encodeURIComponent('WTFHTDN suggestion: ' + text);
+  const body = encodeURIComponent('Suggested addition to the feed:\n\n' + text + '\n\n(feel free to add any context — who they are, why they deserve to be on here)');
+  window.location.href = `mailto:wtfhtdn@proton.me?subject=${subject}&body=${body}`;
+
+  input.value = '';
+  btn.disabled = true;
+  thanks.style.display = 'block';
+  setTimeout(() => { btn.disabled = false; thanks.style.display = 'none'; }, 4000);
+}
+
+function showStatus(type, msg) {
+  const el = document.getElementById('statusBar');
+  el.className=`status-bar ${type}`;
+  el.innerHTML=type==='loading'?`<div class="spinner"></div>${msg}`:`<span style="margin-right:4px">${type==='success'?'✓':'✗'}</span>${msg}`;
+  if(type!=='loading') setTimeout(()=>{el.className='status-bar hidden';},5000);
+}
+
+function sevDots(n){return '🔥'.repeat(Math.max(1,Math.min(5,n||1)));}
+
+function fmtDate(str) {
+  if(!str) return 'recently';
+  const d=new Date(str);
+  if(isNaN(d)) return str.slice(0,16);
+  const diff=Math.floor((Date.now()-d)/60000);
+  if(diff<2) return 'just now';
+  if(diff<60) return `${diff}m ago`;
+  if(diff<1440) return `${Math.floor(diff/60)}h ago`;
+  if(diff<2880) return 'yesterday';
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+init();
+</script>
+</body>
+</html>
