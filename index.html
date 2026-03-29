@@ -677,7 +677,6 @@ async function loadFeed() {
     }) : 'unknown';
     document.getElementById('lastUpdated').textContent = `Updated ${lu}`;
     document.getElementById('liveDot').className = 'live-dot';
-    showStatus('success', `${allItems.length} items · last digest ${lu}`);
   } catch(err) {
     console.error(err);
     document.getElementById('liveDot').className = 'live-dot dead';
