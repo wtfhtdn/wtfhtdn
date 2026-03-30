@@ -538,6 +538,7 @@ const THEY = [
 ];
 
 let allItems = [], activeFilters = new Set(), meta = {};
+let isFirstLoad = true;
 
 function init() {
   document.addEventListener('keydown', e => { if(e.key==='Escape') { closeModal(); closeSuggestions(); } });
@@ -674,7 +675,8 @@ function pickRandom() {
 
 async function loadFeed() {
   try {
-    const resp = await fetch(`${WORKER_URL}/feed`);
+    const resp = await fetch(`${WORKER_URL}/feed?first=${isFirstLoad ? '1' : '0'}`);
+    isFirstLoad = false;
     if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
     const data = await resp.json();
 
