@@ -716,6 +716,8 @@ function renderFeed() {
     feed.innerHTML = `<div class="empty-state"><span class="big">🔍</span><p>No results. Clear your filters.</p></div>`;
     return;
   }
+    // Clear any empty state before diffing
+  feed.querySelectorAll('.empty-state').forEach(el => el.remove());
 
   // Build a map of currently rendered cards by headline key
   const existing = {};
