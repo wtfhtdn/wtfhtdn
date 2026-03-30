@@ -715,6 +715,7 @@ async function loadFeed() {
 function renderFeed() {
   const feed = document.getElementById('feedEl');
   const items = getFiltered();
+
   if (!items.length && !allItems.length) {
     feed.innerHTML = `<div class="empty-state"><span class="big">📡</span><p>Loading…</p></div>`;
     return;
@@ -723,7 +724,59 @@ function renderFeed() {
     feed.innerHTML = `<div class="empty-state"><span class="big">🔍</span><p>No results. Clear your filters.</p></div>`;
     return;
   }
-  feed.innerHTML = items.map((item, i) => cardHTML(item, i)).join('');
+
+  // Build a map of currently rendered cards by headline key
+  const existing = {};
+  feed.querySelectorAll('.card[data-key]').forEach(el => {
+    existing[el.dataset.key] = el;
+  });
+
+  // Build the new ordered list of keys
+  const newKeys = items.map(i => i.headline.slice(0, 50));
+  const newKeySet = new Set(newKeys);
+
+  // Remove cards that are no longer in the filtered set
+  Object.entries(existing).forEach(([key, el]) => {
+    if (!newKeySet.has(key)) {
+      el.style.transition = 'opacity 0.2s, transform 0.2s';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-4px)';
+      setTimeout(() => el.remove(), 200);
+    }
+  });
+
+  // Insert new cards at the correct position, animate them in
+  items.forEach((item, i) => {
+    const key = item.headline.slice(0, 50);
+    if (existing[key]) {
+      // Already rendered — just make sure it's in the right position
+      feed.appendChild(existing[key]);
+      return;
+    }
+    // New card — create and animate in
+    const div = document.createElement('div');
+    div.innerHTML = cardHTML(item, i);
+    const card = div.firstElementChild;
+    card.dataset.key = key;
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(-6px)';
+    card.style.transition = 'none';
+    // Insert at correct position
+    const refCard = feed.querySelectorAll('.card[data-key]')[i];
+    if (refCard) {
+      feed.insertBefore(card, refCard);
+    } else {
+      feed.appendChild(card);
+    }
+    // Trigger animation after paint
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      });
+    });
+  });
 }
 
 const MAX_PER_PERSON = 5;
@@ -752,7 +805,7 @@ function getFiltered() {
 function cardHTML(item, i) {
   const they = THEY.find(t=>t.id===item.who);
   const color = they?.color||'#444';
-  return `<div class="card" onclick="openModal(${i})" style="animation-delay:${Math.min(i,20)*.03}s">
+  return `<div class="card" data-key="${esc(item.headline.slice(0,50))}" onclick="openModal(${i})" style="animation-delay:${Math.min(i,20)*.03}s">
     <div class="card-meta">
       <span class="who-pill" style="background:${color}">${esc(item.whoLabel||item.who)}</span>
       <span class="card-source">${esc(item.source||'')}</span>
