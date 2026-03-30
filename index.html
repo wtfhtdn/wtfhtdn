@@ -104,9 +104,6 @@
   /* CONTROLS */
   .controls{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4)}
   .controls-inner{max-width:1200px;margin:0 auto;padding:11px 24px;display:flex;flex-direction:column;gap:9px}
-  .refresh-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.06em}
-  .refresh-btn:hover{border-color:var(--red);color:var(--red)}
-  .refresh-btn:disabled{opacity:.4;cursor:not-allowed}
   .random-btn{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.06em;flex-shrink:0}
   .random-btn:hover{border-color:var(--yellow);color:var(--yellow)}
   /* FILTER TAG INPUT — autocomplete + selected pills */
@@ -447,7 +444,6 @@
         <div class="tag-suggestions" id="tagSuggestions"></div>
       </div>
       <button class="random-btn" onclick="pickRandom()" title="Pick a random suspect">⚄ RANDOM</button>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadFeed()">↻ CHECK NOW</button>
       <select class="sort-select" id="sortSelect" onchange="renderFeed()">
         <option value="newest">Newest first</option>
         <option value="worst">Worst offences</option>
@@ -677,10 +673,6 @@ function pickRandom() {
 }
 
 async function loadFeed() {
-  const btn = document.getElementById('refreshBtn');
-  btn.disabled = true;
-  showStatus('loading', 'Fetching latest digest…');
-
   try {
     const resp = await fetch(`${WORKER_URL}/feed`);
     if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
@@ -707,8 +699,6 @@ async function loadFeed() {
     console.error(err);
     document.getElementById('liveDot').className = 'live-dot dead';
     showStatus('error', `Could not reach feed: ${err.message}`);
-  } finally {
-    btn.disabled = false;
   }
 }
 
