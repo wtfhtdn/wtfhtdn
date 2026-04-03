@@ -303,6 +303,7 @@
   .share-btn:hover{color:var(--text);border-color:var(--muted)}
   .share-btn.x-btn:hover{color:#fff;border-color:#fff;background:#000}
   .share-btn.bsky-btn:hover{color:#fff;border-color:#0085ff;background:#0085ff}
+  .share-btn.threads-btn:hover{color:#fff;border-color:#000;background:#000}
   .modal-share{display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
   .modal-share-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-right:2px}
   /* EMPTY */
@@ -504,7 +505,7 @@ Summaries are AI-generated from published news reports. All items link to origin
       <p class="about-text" style="margin-top:8px">Covers the last 72 hours. Refreshes every 20 minutes or so when there's something new.</p>
       <p class="about-text" style="margin-top:8px">The people who move and shake the world tend to do a lot of it. This site tries to keep track. Futile, but we try.</p>
       <p class="about-text" style="margin-top:8px">Click any card to expand. Filter by perpetrator, or hit Random.</p>
-      <p class="about-text" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">wtfhtdn v1.4</p>
+      <p class="about-text" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">wtfhtdn v1.4 · <a href="/privacy.html" style="color:var(--muted);text-decoration:underline">privacy policy</a></p>
     </div>
   </div>
 </div>
@@ -910,12 +911,22 @@ function buildShareText(item) {
   return `${item.headline}\n\n${item.summary||''}\n\n${url}\n\nwtfhtdn.com | #wtfhtdn`;
 }
 
+function trackShare(platform) {
+  fetch(`${WORKER_URL}/track`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ platform }),
+  }).catch(() => {});
+}
+
 function shareButtons(item) {
   const encoded = encodeURIComponent(buildShareText(item));
   const xUrl = `https://twitter.com/intent/tweet?text=${encoded}`;
   const bskyUrl = `https://bsky.app/intent/compose?text=${encoded}`;
-  return `<a class="share-btn x-btn" href="${xUrl}" target="_blank" rel="noopener">𝕏 Share</a>
-    <a class="share-btn bsky-btn" href="${bskyUrl}" target="_blank" rel="noopener">☁ Bluesky</a>`;
+  const threadsUrl = `https://www.threads.net/intent/post?text=${encoded}`;
+  return `<a class="share-btn x-btn" href="${xUrl}" target="_blank" rel="noopener" onclick="trackShare('x')">𝕏 Share</a>
+    <a class="share-btn bsky-btn" href="${bskyUrl}" target="_blank" rel="noopener" onclick="trackShare('bsky')">☁ Bluesky</a>
+    <a class="share-btn threads-btn" href="${threadsUrl}" target="_blank" rel="noopener" onclick="trackShare('threads')">⊚ Threads</a>`;
 }
 
 // ── SUGGESTION BOX ───────────────────────────────────────────────────────────
